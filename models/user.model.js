@@ -5,10 +5,15 @@ const userSchema = mongoose.Schema({
     require: true,
     unique: true,
   },
-  password: {
+  // password: {
+  //   type: String,
+  //   require: true,
+  //   unique: true,
+  // },
+
+  googleId: {
     type: String,
     require: true,
-    unique: true,
   },
 });
 

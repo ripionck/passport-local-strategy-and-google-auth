@@ -47,22 +47,22 @@ app.get("/register", (req, res) => {
 });
 
 //register : post
-app.post("/register", async (req, res) => {
-  try {
-    const user = await User.findOne({ username: req.body.username });
-    if (user) return res.status(400).send("User already exist");
-    bcrypt.hash(req.body.password, saltRounds, async function (err, hash) {
-      const newUser = new User({
-        username: req.body.username,
-        password: hash,
-      });
-      await newUser.save();
-    });
-    res.status(201).redirect("/login");
-  } catch (error) {
-    res.status(500).send("registered isn't success");
-  }
-});
+// app.post("/register", async (req, res) => {
+//   try {
+//     const user = await User.findOne({ username: req.body.username });
+//     if (user) return res.status(400).send("User already exist");
+//     bcrypt.hash(req.body.password, saltRounds, async function (err, hash) {
+//       const newUser = new User({
+//         username: req.body.username,
+//         password: hash,
+//       });
+//       await newUser.save();
+//     });
+//     res.status(201).redirect("/login");
+//   } catch (error) {
+//     res.status(500).send("registered isn't success");
+//   }
+// });
 
 const checkLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -75,14 +75,32 @@ const checkLoggedIn = (req, res, next) => {
 app.get("/login", checkLoggedIn, (req, res) => {
   res.render("login");
 });
-//login : post
-app.post(
-  "/login",
-  passport.authenticate("local", {
+
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile"] })
+);
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
     failureRedirect: "/login",
     successRedirect: "/profile",
-  })
+  }),
+  function (req, res) {
+    // Successful authentication, redirect home.
+    res.redirect("/");
+  }
 );
+
+//login : post
+// app.post(
+//   "/login",
+//   passport.authenticate("local", {
+//     failureRedirect: "/login",
+//     successRedirect: "/profile",
+//   })
+// );
 
 const checkAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -92,7 +110,7 @@ const checkAuthenticated = (req, res, next) => {
 };
 //profile protected route
 app.get("/profile", checkAuthenticated, (req, res) => {
-  res.render("profile");
+  res.render("profile", { username: req.user.username });
 });
 
 //logout
